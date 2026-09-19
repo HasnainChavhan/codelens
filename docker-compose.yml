@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ecommerce
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    ports:
+      - "8050:8050"
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=ecommerce
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+      - PYTHONPATH=/app
+    depends_on:
+      - db
