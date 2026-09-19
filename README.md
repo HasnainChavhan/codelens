@@ -1,112 +1,91 @@
-# 🔍 CodeLens — AI-Powered Codebase Documentation Engine
+# codelens
 
-[![Python](https://img.shields.io/badge/Python-3.12-blue)](https://python.org)
-[![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o-412991)](https://openai.com)
-[![Streamlit](https://img.shields.io/badge/Streamlit-UI-FF4B4B)](https://streamlit.io)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688)](https://fastapi.tiangolo.com)
+![Python](https://img.shields.io/badge/Python-3.10-blue)
+![Plotly Dash](https://img.shields.io/badge/Plotly_Dash-2.14-008080)
+![SQLite](https://img.shields.io/badge/SQLite-Database-lightblue)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Ready-blue)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-An AI system that ingests an entire codebase, understands its structure at the code level, and auto-generates clean human-readable documentation for every function, class, module, and API endpoint.
+## Problem Statement
+Business teams need real-time, interactive insights into their e-commerce data without relying on static reports or slow SQL query times. `codelens` is an interactive Business Intelligence dashboard built with Plotly Dash and SQL Analytics to provide real-time KPI tracking, customer segmentation, and product performance analysis.
 
-## ✨ Key Technical Details
-
-- **AST-Level Analysis** — Uses Python's `ast` module to extract function signatures, docstrings, parameters, return types, and **call relationships** — not just reading raw text
-- **Few-Shot Prompted GPT-4o** — Feeds structured AST data + code context with fine-tuned prompts for consistent documentation style
-- **Diff-Based Incremental Updates** — Content hashing detects changed functions and skips unchanged ones — no redundant API calls
-- **Tested on 50,000+ line codebases** — Reduced documentation time from days to **under 15 minutes** for a 10K-line project
-- **One-Click Export** — Markdown and HTML export with a styled output
-- **Streamlit UI** — Interactive repo exploration and progress tracking
-
-## 🏗️ Architecture
-
+## Architecture
 ```
-┌──────────────────────────────────────────────────────────────┐
-│                    Streamlit UI                               │
-│  Path input → AST analysis → Progress → Preview → Export     │
-└──────────────────────┬───────────────────────────────────────┘
-                       │
-              ┌────────▼─────────┐
-              │   AST Extractor  │  ← Python ast module
-              │  (not raw text)  │
-              └────────┬─────────┘
-                       │
-         ┌─────────────┼─────────────┐
-         │             │             │
-   ┌─────▼──────┐ ┌────▼────┐ ┌─────▼──────┐
-   │  Functions │ │ Classes │ │  Modules   │
-   │  + params  │ │+ methods│ │ + imports  │
-   │  + types   │ │+ bases  │ │ + exports  │
-   │  + calls   │ └────┬────┘ └────────────┘
-   └─────┬──────┘      │
-         └─────────────┘
-                │
-       ┌────────▼─────────┐
-       │   Diff Engine    │  ← Hash-based change detection
-       │ (skip unchanged) │
-       └────────┬─────────┘
-                │
-       ┌────────▼─────────┐
-       │  Doc Generator   │  ← GPT-4o + few-shot prompting
-       │  (per function)  │
-       └────────┬─────────┘
-                │
-    ┌───────────┴────────────┐
-    │                        │
-┌───▼────┐            ┌──────▼─────┐
-│Markdown│            │    HTML    │
-│ Export │            │   Export   │
-└────────┘            └────────────┘
++---------------+      +----------------+      +-------------------+
+|               |      |                |      |                   |
+|  Web Browser  +----->+  Plotly Dash   +----->+ SQLite / Postgres |
+|  (UI Client)  |      |  (App Server)  |      | (Data Storage)    |
+|               |      |                |      |                   |
++---------------+      +----------------+      +-------------------+
 ```
 
-## 🚀 Quick Start
+## Features
+- Real-time KPI Tracking (Revenue, Orders, AOV, Customers)
+- Interactive Charts (Time series, categorical breakdowns)
+- Dark mode optimized UI
+- Seed script to generate realistic test data using Faker
+- Docker and Docker Compose ready
 
+## Tech Stack
+| Component | Technology |
+|---|---|
+| Language | Python 3.10 |
+| Dashboard | Plotly Dash |
+| Database | SQLite (Default), PostgreSQL |
+| ORM / Driver | SQLAlchemy, Psycopg2 |
+| Data Manipulation | Pandas, Numpy |
+| Testing | Pytest |
+
+## Quick Start
 ```bash
-git clone https://github.com/HasnainChavhan/codelens
+git clone https://github.com/HasnainChavhan/codelens.git
 cd codelens
-python -m venv .venv
-.venv\Scripts\activate  # Windows
+# To run locally:
 pip install -r requirements.txt
-cp .env.example .env
-# Add OPENAI_API_KEY to .env
+python -m src.data.seed_database
+python -m src.dashboard.app
+
+# To run with Docker (PostgreSQL):
+docker-compose up -d --build
 ```
 
-### Streamlit UI (Recommended)
-
-```bash
-streamlit run ui/streamlit_app.py
+## Dashboard Screenshots (ASCII)
+```text
+========================================================================
+| CODELENS | E-commerce BI Dashboard                   Last updated: Now|
+========================================================================
+| [ $ Total Revenue ]  [ # Orders ]  [ $ Avg Order Val ] [ # Customers ]|
+| [    $1,200,500   ]  [   5,000  ]  [       $240      ] [    1,000    ]|
+| [      ^ 5.2%     ]  [   ^ 2.1% ]  [      ^ 3.0%     ] [    ^ 1.5%   ]|
+========================================================================
+|     Monthly Revenue Trend           |        Customer Segments       |
+|      /\                             |             ____               |
+|     /  \/\      /                   |          .-'    '-.            |
+|    /      \____/                    |         /  PREM    \           |
+|   /                                 |         \   STD    /           |
+|                                     |          '-.____.-'            |
+========================================================================
 ```
 
-Open http://localhost:8501
+## KPI Descriptions
+- **Total Revenue**: Sum of all completed orders.
+- **Orders**: Total number of transactions.
+- **Avg Order Value**: Total Revenue divided by Total Orders.
+- **Customers**: Unique active users.
 
-### FastAPI (Headless mode)
+## SQL Queries
+Analytics queries are located in `src/database/queries.py` and use pandas `read_sql` for optimized extraction and transformation.
 
-```bash
-uvicorn app.main:app --reload
+## Project Structure
 ```
-
-## 📋 Features
-
-| Feature | Detail |
-|---------|--------|
-| AST Parsing | Function signatures, params, types, call graphs |
-| Documentation Style | Google docstring format |
-| Few-Shot Prompting | 2 examples per request for style consistency |
-| Diff Mode | SHA-256 hashing, skips unchanged functions |
-| Export | Markdown + HTML with syntax highlighting |
-| Codebase Scale | Tested on 50K+ line Python projects |
-| Time to Document | < 15 minutes for a 10K-line project |
-
-## 🧪 Running Tests
-
-```bash
-pytest tests/ -v
+.
+├── src/
+│   ├── dashboard/
+│   ├── data/
+│   └── database/
+├── tests/
+├── Dockerfile
+├── docker-compose.yml
+├── .env.example
+└── requirements.txt
 ```
-
-## 📊 Benchmark Results
-
-Evaluated on 3 real open-source repositories:
-- Documentation quality validated with BLEU scores and human review
-- **10x faster** than manual documentation for large codebases
-
-## 📝 License
-
-MIT
